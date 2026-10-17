@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>Sitzung starten</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Sitzung starten</h1>
+  <p class="sub">Enter drücken übernimmt die Auswahl. Esc schließt.</p>
+  <form id="form">
+    <fieldset><legend>Sprache</legend><div class="choices" id="language"></div></fieldset>
+    <fieldset><legend>Stufe</legend><div class="choices" id="level"></div></fieldset>
+    <fieldset><legend>Korrektur Ausdruck</legend><div class="choices" id="expressionCorrection"></div></fieldset>
+    <fieldset><legend>Korrektur Akzent</legend><div class="choices" id="accentCorrection"></div></fieldset>
+    <fieldset><legend>Audio</legend><div class="choices" id="audio"></div></fieldset>
+    <fieldset>
+      <legend>Modus</legend>
+      <div class="choices" id="mode"></div>
+      <div class="row" id="topicRow" hidden>
+        <input type="text" id="topic" placeholder="z. B. im Café bestellen, Vorstellungsgespräch, Fußball">
+      </div>
+    </fieldset>
+    <p class="status err" id="keyWarning" hidden>
+      Es fehlen noch API-Schlüssel. Für Phase 0 ist das egal, ab Phase 1 brauchst du sie.
+    </p>
+    <div class="actions">
+      <button type="button" id="settings">Einstellungen</button>
+      <button type="submit" class="primary">Los</button>
+    </div>
+  </form>
+  <script type="module" src="quickstart.js"></script>
+</body>
+</html>
