@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>Einstellungen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Einstellungen</h1>
+  <p class="sub">Die Schlüssel werden verschlüsselt nur auf diesem Laptop gespeichert.</p>
+
+  <fieldset>
+    <legend>Anthropic (Claude)</legend>
+    <div class="row">
+      <input type="password" id="anthropicKey" placeholder="sk-ant-…" autocomplete="off">
+      <button type="button" id="saveAnthropic">Speichern</button>
+      <button type="button" id="testAnthropic">Testen</button>
+    </div>
+    <p class="status" id="anthropicStatus"></p>
+    <p class="hint">Erstellen unter console.anthropic.com → API Keys.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Azure Speech</legend>
+    <div class="row">
+      <input type="password" id="azureSpeechKey" placeholder="Schlüssel 1 aus dem Azure-Portal" autocomplete="off">
+      <button type="button" id="saveAzure">Speichern</button>
+      <button type="button" id="testAzure">Testen</button>
+    </div>
+    <div class="row">
+      <label for="azureRegion">Region</label>
+      <input type="text" id="azureRegion" placeholder="westeurope">
+    </div>
+    <p class="status" id="azureStatus"></p>
+    <p class="hint">Azure-Portal → Ressource „Speech service“ → Schlüssel und Endpunkt.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Tastenkürzel</legend>
+    <div class="row">
+      <input type="text" id="hotkey" placeholder="Control+Alt+S">
+    </div>
+    <p class="hint">Startet und beendet eine Sitzung. Beispiele: Control+Alt+S, Control+Shift+Space.</p>
+  </fieldset>
+
+  <div class="actions">
+    <span class="status" id="saved"></span>
+    <button type="button" class="primary" id="close">Fertig</button>
+  </div>
+  <script type="module" src="settings.js"></script>
+</body>
+</html>

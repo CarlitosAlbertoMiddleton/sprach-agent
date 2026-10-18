@@ -1,0 +1,53 @@
+{
+  "name": "sprach-agent",
+  "productName": "Sprach-Agent",
+  "version": "0.3.0",
+  "description": "Freihändiger Sprach-Trainer für Windows mit Claude und Azure Speech",
+  "main": "dist/main/main.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.renderer.json && tsc -p tsconfig.web.json && node scripts/copy-static.mjs",
+    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win --publish never",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "build": {
+    "appId": "com.carlitos.sprachagent",
+    "productName": "Sprach-Agent",
+    "files": [
+      "dist/**/*",
+      "!dist/test/**",
+      "!dist/site/**",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "portable": {
+      "artifactName": "Sprach-Agent-${version}-portable.exe"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.52.0"
+  }
+}
