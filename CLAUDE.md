@@ -6,3 +6,6 @@
 - Kein Bundler: `tsc` für Hauptprozess (CommonJS → `dist/`) und Fenster (ES-Module → `dist/web/`), HTML/CSS kopiert `scripts/copy-static.mjs`.
 - API-Schlüssel nur im Hauptprozess, verschlüsselt mit `safeStorage`; nie an die Fenster geben.
 - Lokal testen unter Linux: `npm run build` und Electron unter `xvfb-run` mit `--no-sandbox`.
+- Gespräch: `claude-opus-5-5` (Einstellung `model` in preferences.json), effort `low`, `fallbacks: "default"`. Claude schreibt englische Erklärungen auf eigene Zeilen mit `EN:`; `SentenceSplitter` gibt diese an die Erklär-Stimme.
+- Spracherkennung läuft im Sitzungsfenster mit dem Azure Speech SDK (Browser-Bundle nach `dist/web/renderer/vendor/`), nur mit Kurzzeit-Token aus dem Hauptprozess. Sprachausgabe per REST im Hauptprozess.
+- `npm test` vor jedem Push.
