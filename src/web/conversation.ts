@@ -14,11 +14,16 @@ export interface TurnSink {
  * and hands it on sentence by sentence, so speaking starts before it is complete.
  */
 export class Conversation {
-  private readonly system: string;
+  private system: string;
   private readonly messages: ChatMessage[] = [];
   private current: { abort: AbortController; spokenText: string } | null = null;
 
   constructor(options: SessionOptions, private readonly key: string, private readonly model: string) {
+    this.system = buildSystemPrompt(options);
+  }
+
+  /** New level or corrections mid-session; applies from the next turn. */
+  update(options: SessionOptions): void {
     this.system = buildSystemPrompt(options);
   }
 
@@ -47,7 +52,7 @@ export class Conversation {
     let full = '';
     const deliver = (seg: Segment) => {
       if (signal.aborted) return;
-      current.spokenText += (seg.lang === 'en' ? '\nEN: ' : ' ') + seg.text;
+      current.spokenText += (seg.lang === 'en' ? '\nEN: ' : seg.lang === 'fix' ? '\nFIX: ' : ' ') + seg.text;
       sink.segment(seg);
     };
     try {
