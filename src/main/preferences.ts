@@ -15,6 +15,7 @@ const DEFAULTS: Preferences = {
   },
   hotkey: 'Control+Alt+S',
   azureRegion: 'westeurope',
+  model: 'claude-opus-5-5',
 };
 
 function file(): string {

@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
+    "moduleResolution": "bundler",
     "outDir": "dist/web",
     "rootDir": "src",
     "strict": true,
@@ -9,5 +10,5 @@
     "lib": ["ES2022", "DOM"],
     "types": []
   },
-  "include": ["src/renderer/**/*.ts", "src/shared/types.ts", "src/shared/languages.ts"]
+  "include": ["src/renderer/**/*.ts", "src/shared/types.ts", "src/shared/languages.ts", "src/shared/commands.ts", "src/shared/sentences.ts"]
 }
