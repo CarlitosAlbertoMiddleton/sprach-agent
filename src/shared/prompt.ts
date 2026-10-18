@@ -1,5 +1,5 @@
-import type { Correction, Level, SessionOptions } from './types';
-import { LANGUAGES } from './languages';
+import type { Correction, Level, SessionOptions } from './types.js';
+import { LANGUAGES } from './languages.js';
 
 const LEVEL: Record<Level, string> = {
   beginner:

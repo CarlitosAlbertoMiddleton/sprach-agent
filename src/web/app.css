@@ -1,0 +1,29 @@
+/* Browser version: one page with three views, from phone to desktop width. */
+html, body { height: 100%; }
+body {
+  padding: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 560px; margin: 0 auto; padding-block: 20px 32px; }
+.page a { color: var(--accent); }
+.page code { font-size: 12px; }
+#azureRows { margin-top: 4px; }
+
+body[data-view="session"] { overflow: hidden; }
+section.session {
+  max-width: 560px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto auto;
+  overflow: hidden;
+}
+section.session .transcript { min-height: 0; }
+.line { overflow-wrap: anywhere; }
+
+@media (max-width: 420px) {
+  .session-foot { flex-direction: column; align-items: stretch; }
+  .session-foot .buttons { justify-content: flex-end; }
+  .actions { flex-wrap: wrap; }
+}

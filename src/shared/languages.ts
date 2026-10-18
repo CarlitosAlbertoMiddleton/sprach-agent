@@ -1,4 +1,4 @@
-import type { LanguageCode } from './types';
+import type { LanguageCode } from './types.js';
 
 export interface LanguageInfo {
   code: LanguageCode;

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "outDir": "dist/site",
+    "rootDir": "src",
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["src/web/**/*.ts", "src/shared/types.ts", "src/shared/languages.ts", "src/shared/commands.ts", "src/shared/sentences.ts", "src/shared/prompt.ts"]
+}

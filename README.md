@@ -1,6 +1,11 @@
 # Sprach-Agent
 
-Windows-App zum Sprachenlernen: einmal aktivieren, dann freihändig mit einem KI-Gesprächspartner sprechen. Claude führt das Gespräch, Azure Speech hört zu, spricht und bewertet die Aussprache.
+Sprachenlernen mit einem KI-Gesprächspartner: einmal starten, dann freihändig sprechen. Claude führt das Gespräch, der Browser oder Azure Speech hört zu und spricht.
+
+Es gibt zwei Versionen mit demselben Gesprächskern:
+
+- **Browser-Version** (empfohlen): läuft ohne Installation in Chrome oder Edge, auch auf dem Handy, unter https://carlitosalbertomiddleton.github.io/sprach-agent/
+- **Windows-App** (Electron): mit Taskleisten-Symbol und Tastenkürzel. Auf Rechnern mit Smart App Control startet sie nicht, solange sie nicht signiert ist.
 
 Der vollständige Plan liegt im Projektordner unter `plan/plan-v0.1.md`.
 
@@ -10,12 +15,22 @@ Der vollständige Plan liegt im Projektordner unter `plan/plan-v0.1.md`.
 |---|---|---|
 | 0 | Grundlage: Taskleisten-Symbol, Tastenkürzel, Schnellwahl, Einstellungen für API-Schlüssel | fertig zum Testen |
 | 1 | Sprechschleife: freihändig sprechen, Claude antwortet mit Stimme, Unterbrechen, Sprachbefehle | fertig zum Testen |
+| 1b | Browser-Version mit derselben Sprechschleife, Stimmen vom Browser oder von Azure | fertig zum Testen |
 | 2 | Sprachstufen und Korrektur Ausdruck | offen |
 | 3 | Akzent-Bewertung | offen |
 | 4 | Vier Sprachen, Zusammenfassung, Sprachbefehle | offen |
 | 5 | Installer und Autostart | offen |
 
-## Testen auf Windows (ohne Programmieren)
+## Browser-Version benutzen
+
+1. https://carlitosalbertomiddleton.github.io/sprach-agent/ in Chrome oder Edge öffnen.
+2. Bei **Einrichtung** den Anthropic-Schlüssel eintragen und **Testen** drücken. Bei „Hören und Sprechen“ reicht **Browser (kostenlos)**.
+3. **Speichern**, Sprache und Optionen wählen, **Los**. Der Browser fragt einmal nach dem Mikrofon: **Zulassen**.
+4. Die Schlüssel bleiben nur in diesem Browser auf diesem Gerät. **Schlüssel löschen** entfernt sie wieder.
+
+Jeder Push auf `main` stellt die neue Version automatisch online (Workflow „Browser-Version“).
+
+## Windows-App testen (ohne Programmieren)
 
 1. Auf GitHub im Repo oben auf **Actions** klicken.
 2. Den neuesten grünen Lauf „Windows-Build“ öffnen.
@@ -54,4 +69,5 @@ Aufbau:
 - `src/main/conversation.ts` Gespräch mit Claude: Streaming, Satz für Satz, Sprachausgabe pro Satz
 - `src/main/speech.ts` Azure-Token für die Spracherkennung, Sprachausgabe (REST)
 - `src/renderer/` Fenster „Sitzung starten“, „Einstellungen“ und das Sitzungsfenster (Mikrofon, Spracherkennung, Wiedergabe)
+- `src/web/` Browser-Version: eine Seite mit Einrichtung, Schnellwahl und Sitzung; Claude per `fetch` direkt aus dem Browser, Hören und Sprechen über die Web Speech API oder das Azure Speech SDK
 - `src/shared/` gemeinsame Typen, Sprachliste, System-Prompt, Sprachbefehle, Satz-Zerlegung
