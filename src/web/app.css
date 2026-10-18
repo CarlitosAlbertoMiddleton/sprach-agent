@@ -27,3 +27,24 @@ section.session .transcript { min-height: 0; }
   .session-foot .buttons { justify-content: flex-end; }
   .actions { flex-wrap: wrap; }
 }
+
+/* Corrections: what you said, struck through, then the better version and why. */
+.line.fix {
+  align-self: flex-start;
+  background: var(--panel);
+  border: 1px solid var(--ok);
+  border-left-width: 4px;
+}
+.line.fix s, .last-fixes s { color: var(--muted); }
+.line.fix strong, .last-fixes strong { color: var(--ok); }
+.line.fix .why, .last-fixes .why { display: block; font-size: 13px; color: var(--muted); }
+
+.last-fixes {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+}
+.last-fixes h2 { font-size: 15px; margin: 0 0 6px; }
+.last-fixes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }

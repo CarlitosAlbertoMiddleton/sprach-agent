@@ -16,7 +16,7 @@ Der vollständige Plan liegt im Projektordner unter `plan/plan-v0.1.md`.
 | 0 | Grundlage: Taskleisten-Symbol, Tastenkürzel, Schnellwahl, Einstellungen für API-Schlüssel | fertig zum Testen |
 | 1 | Sprechschleife: freihändig sprechen, Claude antwortet mit Stimme, Unterbrechen, Sprachbefehle | fertig zum Testen |
 | 1b | Browser-Version mit derselben Sprechschleife, Stimmen vom Browser oder von Azure | fertig zum Testen |
-| 2 | Sprachstufen und Korrektur Ausdruck | offen |
+| 2 | Sprachstufen und Korrektur Ausdruck: deutlich verschiedene Stufen, Korrektur-Karten, Hilfe beim Stocken, Befehle zum Anpassen | fertig zum Testen (Browser) |
 | 3 | Akzent-Bewertung | offen |
 | 4 | Vier Sprachen, Zusammenfassung, Sprachbefehle | offen |
 | 5 | Installer und Autostart | offen |
@@ -50,7 +50,10 @@ Jeder Push auf `main` stellt die neue Version automatisch online (Workflow „Br
 - Nach **Los** erscheint unten rechts das Sitzungsfenster. Der Partner begrüßt dich, danach sprichst du einfach. Eine kurze Sprechpause beendet deinen Satz.
 - Du kannst ihn jederzeit unterbrechen, indem du weiterredest (mit Lautsprechern braucht es ein paar Wörter mehr).
 - Sprachbefehle (nur als ganzer Satz): „Ende“, „Pause“, „Weiter“, „Wiederhol das“, „Langsamer“, „Schneller“, auch auf Französisch, Englisch, Italienisch und Spanisch.
-- Erklärungen und Korrekturen kommen auf Englisch mit einer zweiten Stimme und stehen gestrichelt im Fenster.
+- Erklärungen kommen auf Englisch mit einer zweiten Stimme und stehen gestrichelt im Fenster.
+- Korrekturen erscheinen als grüne Karte (durchgestrichen, was du gesagt hast, daneben die bessere Form). Die bessere Form spricht die Stimme der Zielsprache vor, den Grund die englische Stimme. Nach „Ende“ stehen alle Korrekturen auf der Startseite.
+- Als Anfänger (nach 12 Sekunden) oder Mittel (nach 20 Sekunden) Stille hilft der Partner mit einem Satzanfang.
+- In der Browser-Version ändern „einfacher“, „schwieriger“, „mehr korrigieren“ und „weniger korrigieren“ die Einstellung mitten im Gespräch.
 
 ## Entwicklung
 

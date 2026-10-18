@@ -53,6 +53,10 @@
   <section id="start" class="page" hidden>
     <h1>Sitzung starten</h1>
     <p class="sub" id="engineNote"></p>
+    <section class="last-fixes" id="lastCorrections" hidden>
+      <h2>Deine Korrekturen aus der letzten Sitzung</h2>
+      <ul id="lastCorrectionsList"></ul>
+    </section>
     <form id="startForm">
       <fieldset><legend>Sprache</legend><div class="choices" id="language"></div></fieldset>
       <fieldset><legend>Stufe</legend><div class="choices" id="level"></div></fieldset>
@@ -89,7 +93,7 @@
     <p class="partial" id="partial"></p>
     <p class="status err" id="error" hidden></p>
     <footer class="session-foot">
-      <span class="hint">Sag „Ende“ zum Beenden, „Pause“ zum Anhalten.</span>
+      <span class="hint">Sag „Ende“ zum Beenden, „Pause“ zum Anhalten, „einfacher“, „schwieriger“, „mehr korrigieren“ oder „weniger korrigieren“ zum Anpassen.</span>
       <div class="buttons">
         <button type="button" id="pause">Pause</button>
         <button type="button" class="primary" id="end">Ende</button>

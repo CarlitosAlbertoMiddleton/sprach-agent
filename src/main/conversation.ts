@@ -66,8 +66,18 @@ export class Conversation {
     // Audio is synthesized in parallel but delivered in order.
     let delivery = Promise.resolve();
     const deliver = (seg: Segment) => {
-      const i = index++;
+      // A correction is heard as the better phrasing in the target voice, then the reason in English.
+      if (seg.fix) {
+        current.spokenText += `\nFIX: ${seg.text}`;
+        say({ text: seg.fix.right, lang: 'target' });
+        if (seg.fix.why) say({ text: seg.fix.why, lang: 'en' });
+        return;
+      }
       current.spokenText += (seg.lang === 'en' ? '\nEN: ' : ' ') + seg.text;
+      say(seg as { text: string; lang: 'target' | 'en' });
+    };
+    const say = (seg: { text: string; lang: 'target' | 'en' }) => {
+      const i = index++;
       const audio = synthesize(this.region, seg.text, seg.lang === 'en' ? EXPLANATION_VOICE : this.voice, seg.lang === 'en' ? 1 : rate)
         .catch((err: Error) => { console.error(err); return null; });
       delivery = delivery.then(async () => {

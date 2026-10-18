@@ -1,6 +1,8 @@
 import { detectCommand } from '../shared/commands.js';
 import { LANGUAGES } from '../shared/languages.js';
-import type { Segment } from '../shared/sentences.js';
+import { CORRECTION_LABEL, LEVEL_LABEL, STUCK_SECONDS, stepCorrection, stepLevel } from '../shared/options.js';
+import { settingsChanged, stuckHint } from '../shared/prompt.js';
+import type { Correction, Segment } from '../shared/sentences.js';
 import type { Level, SessionOptions } from '../shared/types.js';
 import { testKey } from './claude.js';
 import { Conversation } from './conversation.js';
@@ -151,6 +153,7 @@ function openStart(): void {
     ? 'Stimmen: Azure Speech.'
     : 'Stimmen: kostenlos vom Browser. Am besten klingt es in Microsoft Edge.';
   $('browserWarning').hidden = s.speech !== 'browser' || browserSpeechSupported();
+  renderLastCorrections();
   show('start');
 }
 
@@ -214,17 +217,79 @@ let playing: Item | null = null;
 let pumping = false;
 let lastReply: Segment[] = [];
 let meterFrame = 0;
+let corrections: Correction[] = [];
+let stuckTimer = 0;
+// Help is offered once per silence; speaking again re-enables it.
+let helpGiven = false;
+
+function clearStuckTimer(): void {
+  clearTimeout(stuckTimer);
+  stuckTimer = 0;
+}
+
+function armStuckTimer(): void {
+  clearStuckTimer();
+  const seconds = STUCK_SECONDS[options.level];
+  if (seconds === null || helpGiven || !conversation) return;
+  stuckTimer = window.setTimeout(() => {
+    if (state !== 'listening' || partialEl.textContent) return;
+    helpGiven = true;
+    addLine('note', 'Kleine Hilfe…');
+    send(stuckHint(seconds));
+  }, seconds * 1000);
+}
 
 function setState(next: State): void {
   state = next;
   stateEl.dataset.state = next;
   $('stateLabel').textContent = STATE_LABEL[next];
   pauseBtn.textContent = next === 'paused' ? 'Weiter' : 'Pause';
+  if (next === 'listening' && turnDone) armStuckTimer();
+  else clearStuckTimer();
 }
 
 function showError(message: string | null): void {
   errorEl.hidden = !message;
   errorEl.textContent = message ?? '';
+}
+
+function addCorrection(fix: Correction): void {
+  const card = document.createElement('div');
+  card.className = 'line fix';
+  card.append(correctionView(fix));
+  transcript.append(card);
+  transcript.scrollTop = transcript.scrollHeight;
+}
+
+function correctionView(fix: Correction): DocumentFragment {
+  const frag = document.createDocumentFragment();
+  if (fix.wrong) {
+    const wrong = document.createElement('s');
+    wrong.textContent = fix.wrong;
+    frag.append(wrong, ' → ');
+  }
+  const right = document.createElement('strong');
+  right.textContent = fix.right;
+  frag.append(right);
+  if (fix.why) {
+    const why = document.createElement('span');
+    why.className = 'why';
+    why.textContent = fix.why;
+    frag.append(why);
+  }
+  return frag;
+}
+
+function renderLastCorrections(): void {
+  const box = $('lastCorrections');
+  const list = $('lastCorrectionsList');
+  list.replaceChildren();
+  for (const fix of corrections) {
+    const li = document.createElement('li');
+    li.append(correctionView(fix));
+    list.append(li);
+  }
+  box.hidden = corrections.length === 0;
 }
 
 function addLine(kind: 'me' | 'agent' | 'en' | 'note', text: string): void {
@@ -261,9 +326,38 @@ async function pump(): Promise<void> {
 
 function enqueue(seg: Segment, show = true): void {
   if (!speaker) return;
-  if (show) addLine(seg.lang === 'en' ? 'en' : 'agent', seg.text);
-  queue.push({ seg, clip: speaker.prepare(seg.text, seg.lang, rate) });
+  let clip: Clip;
+  if (seg.fix) {
+    if (show) {
+      addCorrection(seg.fix);
+      corrections.push(seg.fix);
+    }
+    // The better phrasing in the target voice, so you hear it said right, then the reason in English.
+    const parts = [speaker.prepare(seg.fix.right, 'target', rate)];
+    if (seg.fix.why) parts.push(speaker.prepare(seg.fix.why, 'en', 1));
+    clip = sequence(parts);
+  } else {
+    if (show) addLine(seg.lang === 'en' ? 'en' : 'agent', seg.text);
+    clip = speaker.prepare(seg.text, seg.lang === 'en' ? 'en' : 'target', rate);
+  }
+  queue.push({ seg, clip });
   void pump();
+}
+
+function sequence(clips: Clip[]): Clip {
+  let stopped = false;
+  return {
+    async play() {
+      for (const clip of clips) {
+        if (stopped) return;
+        await clip.play();
+      }
+    },
+    stop() {
+      stopped = true;
+      clips.forEach((c) => c.stop());
+    },
+  };
 }
 
 function send(text: string | null): void {
@@ -320,7 +414,37 @@ function handleCommand(command: NonNullable<ReturnType<typeof detectCommand>>): 
       rate = Math.min(1.2, Math.max(0.6, rate + (command === 'slower' ? -0.1 : 0.1)));
       addLine('note', `Sprechtempo ab der nächsten Antwort: ${Math.round(rate * 100)} %`);
       return;
+    case 'easier':
+    case 'harder': {
+      const level = stepLevel(options.level, command === 'easier' ? -1 : 1);
+      if (level === options.level) {
+        addLine('note', `Stufe ist schon ${LEVEL_LABEL[level]}.`);
+        return;
+      }
+      changeOptions({ level }, `Stufe: ${LEVEL_LABEL[level]}`, `level is now ${level}`);
+      rate = BASE_RATE[level];
+      return;
+    }
+    case 'moreCorrections':
+    case 'fewerCorrections': {
+      const c = stepCorrection(options.expressionCorrection, command === 'moreCorrections' ? 1 : -1);
+      if (c === options.expressionCorrection) {
+        addLine('note', `Korrektur ist schon auf ${CORRECTION_LABEL[c]}.`);
+        return;
+      }
+      changeOptions({ expressionCorrection: c }, `Korrektur Ausdruck: ${CORRECTION_LABEL[c]}`, `expression corrections are now "${c}"`);
+      return;
+    }
   }
+}
+
+function changeOptions(update: Partial<SessionOptions>, note: string, forClaude: string): void {
+  options = { ...options, ...update };
+  saveSettings({ lastSession: options });
+  conversation?.update(options);
+  renderChips();
+  addLine('note', note);
+  if (state !== 'paused') send(settingsChanged(forClaude));
 }
 
 function onHeard(text: string): void {
@@ -335,6 +459,7 @@ function onHeard(text: string): void {
   // With speakers, a final result while the partner is talking is most likely
   // its own voice. Real interruptions are caught earlier by onPartial.
   if (state === 'speaking' && options.audio === 'speakers') return;
+  helpGiven = false;
   addLine('me', text);
   send(text);
 }
@@ -342,6 +467,7 @@ function onHeard(text: string): void {
 function onPartial(text: string): void {
   if (state === 'paused') return;
   partialEl.textContent = text;
+  if (text) clearStuckTimer();
   if (state === 'speaking' && words(text) >= BARGE_IN_WORDS[options.audio]) bargeIn();
 }
 
@@ -365,10 +491,9 @@ function startLevelMeter(stream: MediaStream): void {
 function renderChips(): void {
   const s = loadSettings();
   const language = LANGUAGES.find((l) => l.code === options.language)?.name ?? options.language;
-  const level = { beginner: 'Anfänger', intermediate: 'Mittel', advanced: 'Fortgeschritten' }[options.level];
   const chips = $('chips');
   chips.replaceChildren();
-  for (const text of [language, level, options.audio === 'headphones' ? 'Kopfhörer' : 'Lautsprecher', s.speech === 'azure' ? 'Azure' : 'Browser']) {
+  for (const text of [language, LEVEL_LABEL[options.level], `Korrektur: ${CORRECTION_LABEL[options.expressionCorrection]}`, options.audio === 'headphones' ? 'Kopfhörer' : 'Lautsprecher', s.speech === 'azure' ? 'Azure' : 'Browser']) {
     const span = document.createElement('span');
     span.className = 'chip';
     span.textContent = text;
@@ -380,6 +505,8 @@ async function startSession(chosen: SessionOptions): Promise<void> {
   const s = loadSettings();
   options = chosen;
   rate = BASE_RATE[options.level];
+  corrections = [];
+  helpGiven = false;
   transcript.replaceChildren();
   partialEl.textContent = '';
   showError(null);
@@ -424,6 +551,7 @@ async function startSession(chosen: SessionOptions): Promise<void> {
 }
 
 function endSession(): void {
+  clearStuckTimer();
   stopAudio();
   conversation?.cancel();
   conversation = null;

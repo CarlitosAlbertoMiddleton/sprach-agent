@@ -3,26 +3,38 @@ import { LANGUAGES } from './languages.js';
 
 const LEVEL: Record<Level, string> = {
   beginner:
-    'The learner is a beginner (CEFR A1-A2). Use only very common words and short, simple sentences with one idea each. ' +
-    'Prefer present tense. Ask simple questions and lead the conversation. ' +
-    'If the learner seems stuck or answers in another language, help them with a short English explanation and a simple phrase to repeat.',
+    'Level: beginner (CEFR A1-A2). This must feel clearly easier than a normal conversation:\n' +
+    '- At most 2 sentences per reply, each at most 8 words, one idea per sentence.\n' +
+    '- Only the most common everyday words, present tense by default, no idioms, no slang, no subordinate clauses.\n' +
+    '- You lead: ask one simple question at a time, often as a choice between two answers.\n' +
+    '- If the learner answers in Spanish, German or English, or seems stuck, give a short EN: line and a simple phrase to repeat.',
   intermediate:
-    'The learner is intermediate (CEFR B1-B2). Use everyday vocabulary and common idioms at a natural but slightly careful pace. ' +
-    'Share the lead in the conversation. Explain in English only when the learner asks or is clearly lost.',
+    'Level: intermediate (CEFR B1-B2):\n' +
+    '- 2 to 3 sentences per reply, everyday vocabulary and common idioms, all common tenses.\n' +
+    '- Share the lead: answer, add a small opinion or detail of your own, then ask an open question.\n' +
+    '- Use English only when the learner asks or is clearly lost.',
   advanced:
-    'The learner is advanced (CEFR C1-C2). Speak naturally and idiomatically, including colloquial expressions. ' +
-    'Discuss, disagree, and ask follow-up questions. Avoid English except when the learner asks for it; prefer explaining in the target language.',
+    'Level: advanced (CEFR C1-C2):\n' +
+    '- Up to 4 sentences, natural speed and register, idioms and colloquial expressions, complex sentences.\n' +
+    '- Discuss like a native friend: give opinions, disagree sometimes, ask follow-up questions that make the learner argue or explain.\n' +
+    '- Avoid English. If something needs explaining, explain it in the target language.',
 };
 
+const FIX_FORMAT =
+  'Write each correction on its own line in exactly this form: FIX: "what the learner said" -> "better version" | short English reason.\n' +
+  'Example for French: FIX: "j\'ai allé" -> "je suis allé" | aller takes être in the passé composé.\n' +
+  'Quote only the few words that change, not the whole sentence. Never correct punctuation or capitalisation; the transcript has none to judge.';
+
 const EXPRESSION: Record<Correction, string> = {
-  off: 'Do not correct grammar or word choice. Just keep the conversation going.',
-  low: 'Correct grammar or word choice only when a mistake makes the meaning unclear.',
+  off: 'Corrections: none. Never correct grammar or word choice, and write no FIX lines. Just keep the conversation going.',
+  low:
+    'Corrections: rare. Correct only a mistake that makes the meaning unclear or wrong, at most one per reply.\n' + FIX_FORMAT,
   normal:
-    'Correct the most important mistake in the learner\'s last turn, at most one per reply. ' +
-    'Do it naturally: first answer the content, then add one short EN: line with the better phrasing in the target language and a few words of English explanation.',
+    'Corrections: normal. Correct the single most important mistake in the learner\'s last turn, at most one per reply, ' +
+    'and skip small slips. First reply to what they said, then put the FIX line, then continue with your question.\n' + FIX_FORMAT,
   high:
-    'Correct every mistake in the learner\'s last turn and also suggest how a native speaker would say it more naturally. ' +
-    'Put corrections on EN: lines after your answer, one line per correction.',
+    'Corrections: thorough. Correct every mistake in the learner\'s last turn, one FIX line each, and also add a FIX line when a phrase is correct ' +
+    'but a native speaker would say it differently (reason: "more natural"). First reply to what they said, then the FIX lines, then your question.\n' + FIX_FORMAT,
 };
 
 const ACCENT: Record<Correction, string> = {
@@ -62,8 +74,8 @@ export function buildSystemPrompt(options: SessionOptions): string {
     'Output rules:\n' +
       '- Reply in 1 to 3 short sentences, then usually end with a question that keeps the conversation going.\n' +
       '- Plain spoken text only: no markdown, no lists, no emojis, no stage directions.\n' +
-      `- Everything in ${name} goes on normal lines. Every explanation or correction in English goes on its own line that starts with "EN:". ` +
-      'Those lines are read by a separate English voice.\n' +
+      `- Everything in ${name} goes on normal lines. Every other explanation in English goes on its own line that starts with "EN:". ` +
+      'Those lines are read by a separate English voice. Corrections use FIX: lines as described below.\n' +
       '- Write numbers, times and abbreviations the way they are spoken.',
     LEVEL[options.level],
     EXPRESSION[options.expressionCorrection],
@@ -74,3 +86,14 @@ export function buildSystemPrompt(options: SessionOptions): string {
 
 /** First user turn, so the partner opens the conversation. */
 export const SESSION_START = '[The session has just started. Greet Carlos briefly and open the conversation.]';
+
+/** Sent when the learner has been silent for a while after the partner spoke. */
+export function stuckHint(seconds: number): string {
+  return `[Carlos has been silent for ${seconds} seconds and may be stuck. Help him answer your last question: ` +
+    'give the start of a possible answer or two simple options in the target language, plus a very short EN: hint. Keep it brief and friendly.]';
+}
+
+/** Sent when the learner changes level or corrections mid-session by voice. */
+export function settingsChanged(what: string): string {
+  return `[Carlos changed a setting: ${what}. Acknowledge it in a few words in the target language and continue the conversation at the new setting.]`;
+}
